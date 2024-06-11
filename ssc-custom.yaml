@@ -1,0 +1,250 @@
+openapi: 3.1.0
+info:
+  title: SecurityScorecard API
+  description: API for retrieving the scorecard for a company using its identifier.
+  version: 1.0.0
+servers:
+  - url: https://api.securityscorecard.io
+    description: SecurityScorecard API server
+paths:
+  /companies/{scorecard_identifier}:
+    get:
+      operationId: getScorecard
+      summary: Retrieve the scorecard for a company
+      parameters:
+        - name: scorecard_identifier
+          in: path
+          required: true
+          description: The identifier of the company's scorecard
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON object containing the company's scorecard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scorecard:
+                    type: object
+                    description: The company's scorecard details
+        '401':
+          description: Unauthorized - invalid or missing API token
+        '404':
+          description: Not Found - scorecard identifier not found
+
+  /asi/details/asset/{ip}:
+    get:
+      operationId: getAssetDetailsByIp
+      summary: Retrieve asset details by IP
+      description: Retrieve detailed information about an asset by its IP address.
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          description: The IP address of the asset to retrieve details for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset:
+                    type: object
+                    description: Detailed information about the asset.
+        '400':
+          description: Invalid IP address provided.
+        '401':
+          description: Unauthorized. API key is missing or invalid.
+        '404':
+          description: Asset not found.
+        '500':
+          description: Internal server error.
+
+  /asi/search:
+    post:
+      operationId: asiSearch
+      summary: Perform intelligence attack surface
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The search query string for perform attack surface intelligence
+      responses:
+        '200':
+          description: Successful search response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: Search result item
+        '400':
+          description: Bad request, invalid input
+        '401':
+          description: Unauthorized, invalid API key
+        '500':
+          description: Internal server error
+  /companies/{scorecard_identifier}:
+    get:
+      operationId: getCompanyScorecard
+      summary: Retrieve security scorecard for a company
+      description: Returns the security scorecard information for a specified company.
+      parameters:
+        - name: scorecard_identifier
+          in: path
+          required: true
+          description: The identifier for the company's scorecard
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON object containing the company's security scorecard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  score:
+                    type: integer
+                    description: The security score
+                  details:
+                    type: object
+                    description: Detailed information about the score
+                    additionalProperties:
+                      type: string
+        '400':
+          description: Bad request, possibly due to a malformed identifier
+        '404':
+          description: Company scorecard not found
+        '500':
+          description: Internal server error
+  /companies/{domain}/factors:
+    get:
+      operationId: getFactors
+      summary: Get security factors for a company.
+      description: Fetches the security factors for the specified company domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          description: The domain of the company to fetch factors for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON object containing security factors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  factors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        score:
+                          type: integer
+        '401':
+          description: Unauthorized - Invalid or missing API key.
+        '404':
+          description: Not Found - The specified company domain does not exist.
+  /companies/{domain}/history/factors/score:
+    get:
+      operationId: getScoreHistory
+      summary: Retrieve score history of a company
+      description: Retrieve the historical score factors of the specified company.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          description: The domain of the company to retrieve the score history for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved score history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  factors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        score:
+                          type: number
+        '400':
+          description: Bad request, possibly due to an invalid domain
+        '401':
+          description: Unauthorized, API key missing or invalid
+        '404':
+          description: Company not found
+        '500':
+          description: Internal server error
+
+  /companies/{company}/history/events/:
+    get:
+      operationId: getCompanyHistoryEvents
+      summary: Get historical events for a company
+      description: Retrieves the historical events for a specific company identified by its domain.
+      parameters:
+        - name: company
+          in: path
+          required: true
+          description: The domain of the company
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of historical events for the company
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    event_id:
+                      type: string
+                      description: The ID of the event
+                    event_type:
+                      type: string
+                      description: The type of the event
+                    event_date:
+                      type: string
+                      format: date-time
+                      description: The date and time when the event occurred
+                    event_description:
+                      type: string
+                      description: A description of the event
+        '400':
+          description: Bad request. The company domain might be missing or invalid.
+        '401':
+          description: Unauthorized. The API key is missing or invalid.
+        '404':
+          description: Not found. The specified company does not exist.
+        '500':
+          description: Internal server error. An unexpected error occurred.
